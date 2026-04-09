@@ -4,22 +4,29 @@
 
 @layer base {
   body {
-    @apply bg-siembg text-slate-300 m-0 p-0;
+    @apply bg-siembg text-slate-300 m-0 p-0 antialiased selection:bg-siemaccent selection:text-white;
   }
 }
 
-/* Custom Scrollbar for dark theme */
+/* Custom UI Utilities */
+@layer utilities {
+  .glass-panel {
+    @apply bg-siempanel/80 backdrop-blur-md border border-siemborder shadow-lg;
+  }
+}
+
+/* Ultra-minimal Scrollbar for modern themes */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0F111A; 
+  background: transparent; 
 }
 ::-webkit-scrollbar-thumb {
-  background: #2D3343; 
-  border-radius: 4px;
+  background: #374151; 
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3B4252; 
+  background: #4B5563; 
 }

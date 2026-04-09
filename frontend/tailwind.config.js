@@ -7,17 +7,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        siembg: '#0F111A',
-        siempanel: '#1A1D27',
-        siemaccent: '#00D1FF',
-        siemdanger: '#FF3B3B',
-        siemwarn: '#FFB800',
-        siemok: '#00E676',
-        siemmelow: '#8B949E'
+        siembg: '#050B14',      // Ultra deep blue/black
+        siempanel: '#111827',   // Slate-900 equivalent for base panels
+        siempanelhover: '#1F2937', 
+        siemaccent: '#0EA5E9',  // Sky blue (Wazuh active state style)
+        siemdanger: '#EF4444',  // Sharp red
+        siemwarn: '#F59E0B',    // Amber
+        siemok: '#10B981',      // Emerald
+        siemmelow: '#9CA3AF',   // Text muted (Gray 400)
+        siemborder: '#374151'   // Subtle borders (Gray 700)
       },
       fontFamily: {
         mono: ['"Fira Code"', 'monospace'],
-        sans: ['"Inter"', 'sans-serif'],
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       }
     },
   },

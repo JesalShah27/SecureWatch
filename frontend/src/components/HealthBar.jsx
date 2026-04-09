@@ -23,31 +23,33 @@ const HealthBar = () => {
     if (!health) return null;
 
     const getStatusStyle = () => {
-        if (health.status === 'healthy') return 'bg-emerald-900/50 text-emerald-400 border-emerald-800';
-        if (health.status === 'warning') return 'bg-amber-900/50 text-amber-400 border-amber-800';
-        return 'bg-rose-900/50 text-rose-400 border-rose-800';
+        if (health.status === 'healthy') return 'bg-siemok/10 text-siemok border-siemok/30';
+        if (health.status === 'warning') return 'bg-siemwarn/10 text-siemwarn border-siemwarn/30';
+        return 'bg-siemdanger/10 text-siemdanger border-siemdanger/30';
     };
 
     const getIcon = () => {
-        if (health.status === 'healthy') return <ShieldCheck size={14} className="mr-1" />;
-        if (health.status === 'warning') return <AlertTriangle size={14} className="mr-1" />;
-        return <ServerCrash size={14} className="mr-1" />;
+        if (health.status === 'healthy') return <ShieldCheck size={14} className="mr-1.5" />;
+        if (health.status === 'warning') return <AlertTriangle size={14} className="mr-1.5 animate-pulse" />;
+        return <ServerCrash size={14} className="mr-1.5 animate-bounce" />;
     };
 
     return (
-        <div className={`px-3 py-1 flex items-center text-xs font-mono font-bold border-b transition-colors ${getStatusStyle()}`}>
-            {getIcon()}
-            <span className="uppercase tracking-widest mr-4">System: {health.status}</span>
-            
-            {health.system && (
-                <div className="flex space-x-4 opacity-80 hidden md:flex">
-                    <span>CPU: {health.system.cpu_percent.toFixed(1)}%</span>
-                    <span>MEM: {health.system.memory_percent.toFixed(1)}%</span>
-                    <span>DISK: {health.system.disk_percent.toFixed(1)}%</span>
-                </div>
-            )}
-            
-            {health.error && <span className="ml-auto">API Connection Failed</span>}
+        <div className={`px-4 py-1.5 flex items-center text-xs font-mono font-medium border-b backdrop-blur-md z-50 transition-all shadow-sm ${getStatusStyle()}`}>
+            <div className="flex items-center w-full max-w-7xl mx-auto">
+                {getIcon()}
+                <span className="uppercase tracking-widest mr-6 font-bold">System {health.status}</span>
+                
+                {health.system && (
+                    <div className="flex space-x-6 opacity-80 hidden md:flex text-[11px]">
+                        <span className="flex items-center"><Activity size={12} className="mr-1 opacity-70" /> CPU: {health.system.cpu_percent.toFixed(1)}%</span>
+                        <span className="flex items-center"><Activity size={12} className="mr-1 opacity-70" /> MEM: {health.system.memory_percent.toFixed(1)}%</span>
+                        <span className="flex items-center"><Activity size={12} className="mr-1 opacity-70" /> DISK: {health.system.disk_percent.toFixed(1)}%</span>
+                    </div>
+                )}
+                
+                {health.error && <span className="ml-auto flex items-center text-siemdanger font-bold"><ServerCrash size={12} className="mr-1" /> API Disconnected</span>}
+            </div>
         </div>
     );
 };

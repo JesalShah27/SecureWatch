@@ -48,53 +48,65 @@ function App() {
       <HealthBar />
       <div className="flex flex-1 overflow-hidden">
         {/* SIDEBAR NAVIGATION */}
-        <nav className="w-64 bg-siempanel border-r border-slate-800 flex flex-col p-4 space-y-6 flex-shrink-0">
-        <div className="flex items-center space-x-3 text-white px-2">
-          <Shield className="text-siemaccent" size={32} />
-          <h1 className="text-2xl font-bold tracking-widest font-mono">SecureWatch</h1>
+        <nav className="w-64 bg-[#0b0f19] border-r border-siemborder flex flex-col pt-6 pb-4 space-y-6 flex-shrink-0 z-10 shadow-2xl relative">
+        <div className="flex items-center space-x-3 text-white px-5 mb-2">
+          <div className="p-1.5 bg-gradient-to-br from-siemaccent to-blue-600 rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.5)]">
+            <Shield className="text-white" size={24} />
+          </div>
+          <h1 className="text-2xl font-bold tracking-wider font-mono bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">SecureWatch</h1>
         </div>
         
-        <div className="flex flex-col space-y-2 text-sm font-semibold mt-8">
-          <Link to="/" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-siemaccent transition-colors">
-            <Activity size={18} /><span>Overview</span>
+        <div className="flex flex-col space-y-1 text-sm font-semibold mt-8 px-3">
+          <Link to="/" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Activity size={18} className="text-siemaccent group-hover:scale-110 transition-transform" /><span>Global Overview</span>
           </Link>
-          <Link to="/alerts" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-siemdanger transition-colors justify-between">
+          <Link to="/alerts" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group justify-between">
             <div className="flex items-center space-x-3">
-              <AlertOctagon size={18} /><span>Alerts Console</span>
+              <AlertOctagon size={18} className="text-siemdanger group-hover:scale-110 transition-transform" /><span>Alerts Data</span>
             </div>
           </Link>
-          <Link to="/response" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-siemwarn transition-colors">
-            <Crosshair size={18} /><span>Active Response</span>
+          <Link to="/response" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Crosshair size={18} className="text-siemwarn group-hover:scale-110 transition-transform" /><span>Active Response</span>
           </Link>
-          <Link to="/threat-intel" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-cyan-400 transition-colors">
-            <Globe size={18} /><span>Threat Intelligence</span>
+          <div className="my-2 border-t border-siemborder/50 mx-2"></div>
+          <p className="px-3 text-xs font-bold text-siemmelow uppercase tracking-wider mb-1 mt-2">Threats</p>
+          <Link to="/threat-intel" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Globe size={18} className="text-cyan-400 group-hover:scale-110 transition-transform" /><span>Threat Intel</span>
           </Link>
-          <Link to="/agents" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-siemaccent transition-colors">
-            <Monitor size={18} /><span>Agents</span>
+          <Link to="/hunting" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Terminal size={18} className="text-purple-400 group-hover:scale-110 transition-transform" /><span>Threat Hunting</span>
           </Link>
-          <Link to="/fim" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-amber-400 transition-colors">
-            <FileSearch size={18} /><span>File Integrity</span>
+
+          <div className="my-2 border-t border-siemborder/50 mx-2"></div>
+          <p className="px-3 text-xs font-bold text-siemmelow uppercase tracking-wider mb-1 mt-2">Endpoints</p>
+          <Link to="/agents" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Monitor size={18} className="text-siemok group-hover:scale-110 transition-transform" /><span>Agents</span>
           </Link>
-          <Link to="/vulnerabilities" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-rose-400 transition-colors">
-            <Bug size={18} /><span>Vulnerabilities</span>
+          <Link to="/assets" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Users size={18} className="text-indigo-400 group-hover:scale-110 transition-transform" /><span>Asset Inventory</span>
           </Link>
-          <Link to="/sca" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-emerald-400 transition-colors">
-            <ClipboardList size={18} /><span>Configuration</span>
+          <Link to="/vulnerabilities" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <Bug size={18} className="text-rose-400 group-hover:scale-110 transition-transform" /><span>Vulnerabilities</span>
           </Link>
-          <Link to="/compliance" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-indigo-400 transition-colors">
-            <BookOpen size={18} /><span>Compliance</span>
+
+          <div className="my-2 border-t border-siemborder/50 mx-2"></div>
+          <p className="px-3 text-xs font-bold text-siemmelow uppercase tracking-wider mb-1 mt-2">Auditing</p>
+          <Link to="/fim" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <FileSearch size={18} className="text-amber-400 group-hover:scale-110 transition-transform" /><span>File Integrity</span>
           </Link>
-          <Link to="/hunting" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-siemaccent transition-colors">
-            <Terminal size={18} /><span>Threat Hunting</span>
+          <Link to="/sca" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <ClipboardList size={18} className="text-emerald-400 group-hover:scale-110 transition-transform" /><span>Configuration</span>
           </Link>
-          <Link to="/assets" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 transition-colors">
-            <Users size={18} /><span>Asset Inventory</span>
+          <Link to="/compliance" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <BookOpen size={18} className="text-blue-400 group-hover:scale-110 transition-transform" /><span>Compliance</span>
           </Link>
-          <Link to="/reports" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 hover:text-siemwarn transition-colors">
-            <FileText size={18} /><span>Reports</span>
+          
+          <div className="flex-1"></div>
+          <Link to="/reports" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group mt-6">
+            <FileText size={18} className="text-slate-400 group-hover:text-white" /><span>Executive Reports</span>
           </Link>
-          <Link to="/settings" className="flex items-center space-x-3 px-3 py-3 rounded hover:bg-slate-800 transition-colors mt-auto">
-            <SettingsIcon size={18} /><span>Settings/Audit</span>
+          <Link to="/settings" className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-siempanelhover hover:text-white transition-all group">
+            <SettingsIcon size={18} className="text-slate-400 group-hover:text-white group-hover:rotate-90 transition-transform duration-300" /><span>Settings</span>
           </Link>
         </div>
       </nav>
