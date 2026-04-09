@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, ShieldAlert, Cpu, CheckCircle, Server, WifiOff } from 'lucide-react';
+import { AlertCircle, ShieldAlert, Cpu, CheckCircle, Server, WifiOff, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
 export default function Dashboard({ liveAlerts }) {

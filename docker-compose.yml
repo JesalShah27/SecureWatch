@@ -185,6 +185,31 @@ services:
       - securewatch-net
     logging: *default-logging
 
+  manager:
+    build:
+      context: ./manager
+      dockerfile: Dockerfile
+    container_name: securewatch-manager
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redispass123!}@redis:6379/0
+      - POSTGRES_URL=postgresql://${POSTGRES_USER:-siemuser}:${POSTGRES_PASSWORD:-siempass123!}@postgres:5432/${POSTGRES_DB:-siemdb}
+    ports:
+      - "0.0.0.0:1514:1514"    # Agent communication port
+    volumes:
+      - ./manager:/app
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - securewatch-net
+    logging: *default-logging
+    restart: unless-stopped
+
 networks:
   securewatch-net:
     driver: bridge
