@@ -6,7 +6,7 @@ from slowapi.errors import RateLimitExceeded
 import os
 import logging
 
-from routers import alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting
+from routers import auth, users, rules, alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO)
@@ -36,20 +36,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi import Depends
+from auth.rbac import get_current_user
+
 # Includes
-app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
-app.include_router(assets.router, prefix="/api/assets", tags=["Assets"])
-app.include_router(response.router, prefix="/api/response", tags=["Active Response"])
-app.include_router(threat_intel.router, prefix="/api/threat-intel", tags=["Threat Intel"])
-app.include_router(agents.router, prefix="/api/agents", tags=["Agents"])
-app.include_router(fim.router, prefix="/api/fim", tags=["File Integrity"])
-app.include_router(vulnerabilities.router, prefix="/api/vulnerabilities", tags=["Vulnerabilities"])
-app.include_router(sca.router, prefix="/api/sca", tags=["Configuration Assessment"])
-app.include_router(compliance.router, prefix="/api/compliance", tags=["Compliance"])
-app.include_router(hunting.router, prefix="/api/hunting", tags=["Threat Hunting"])
-app.include_router(audit.router, prefix="/api/audit", tags=["Audit Logs"])
-app.include_router(health.router, prefix="/api/diagnostics", tags=["Health Diagnostics"])
-app.include_router(reporting.router, prefix="/api/reporting", tags=["Reporting Engine"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(users.router, prefix="/api/users", tags=["Users"], dependencies=[Depends(get_current_user)])
+app.include_router(rules.router, prefix="/api/rules", tags=["Rules"], dependencies=[Depends(get_current_user)])
+app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"], dependencies=[Depends(get_current_user)])
+app.include_router(assets.router, prefix="/api/assets", tags=["Assets"], dependencies=[Depends(get_current_user)])
+app.include_router(response.router, prefix="/api/response", tags=["Active Response"], dependencies=[Depends(get_current_user)])
+app.include_router(threat_intel.router, prefix="/api/threat-intel", tags=["Threat Intel"], dependencies=[Depends(get_current_user)])
+app.include_router(agents.router, prefix="/api/agents", tags=["Agents"], dependencies=[Depends(get_current_user)])
+app.include_router(fim.router, prefix="/api/fim", tags=["File Integrity"], dependencies=[Depends(get_current_user)])
+app.include_router(vulnerabilities.router, prefix="/api/vulnerabilities", tags=["Vulnerabilities"], dependencies=[Depends(get_current_user)])
+app.include_router(sca.router, prefix="/api/sca", tags=["Configuration Assessment"], dependencies=[Depends(get_current_user)])
+app.include_router(compliance.router, prefix="/api/compliance", tags=["Compliance"], dependencies=[Depends(get_current_user)])
+app.include_router(hunting.router, prefix="/api/hunting", tags=["Threat Hunting"], dependencies=[Depends(get_current_user)])
+app.include_router(audit.router, prefix="/api/audit", tags=["Audit Logs"], dependencies=[Depends(get_current_user)])
+app.include_router(health.router, prefix="/api/diagnostics", tags=["Health Diagnostics"], dependencies=[Depends(get_current_user)])
+app.include_router(reporting.router, prefix="/api/reporting", tags=["Reporting Engine"], dependencies=[Depends(get_current_user)])
 
 @app.get("/health")
 def health_check():

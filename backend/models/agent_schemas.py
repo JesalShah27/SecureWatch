@@ -17,8 +17,8 @@ class AgentResponseSchema(BaseModel):
     os_type: str
     os_version: str
     agent_version: str
-    registration_date: datetime
-    last_seen: datetime
+    registration_date: Optional[datetime]
+    last_seen: Optional[datetime]
     status: str
     group_name: str
     labels: Dict[str, Any]
