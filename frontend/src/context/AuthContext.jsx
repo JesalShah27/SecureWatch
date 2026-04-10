@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
     // Setup Axios Interceptor
     useEffect(() => {
-        axios.defaults.baseURL = 'http://localhost:8000';
+        axios.defaults.baseURL = `http://${window.location.hostname}:8000`;
         
         const requestInterceptor = axios.interceptors.request.use(
             (config) => {

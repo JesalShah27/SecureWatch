@@ -5,7 +5,7 @@ import axios from 'axios';
 // are automatically applied to every request. Do NOT use axios.create()
 // here — that would bypass authentication entirely.
 
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = `http://${window.location.hostname}:8000/api`;
 
 // Helper to make requests using the global axios instance with the correct base URL.
 const apiGet = (path) => axios.get(`${BASE_URL}${path}`);

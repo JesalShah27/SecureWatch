@@ -25,7 +25,7 @@ function App() {
   // Singleton WebSocket connection handling
   useEffect(() => {
     if (!token) return;
-    const ws = new WebSocket('ws://localhost:8000/api/alerts/ws');
+    const ws = new WebSocket(`ws://${window.location.hostname}:8000/api/alerts/ws`);
     
     ws.onmessage = (event) => {
       try {

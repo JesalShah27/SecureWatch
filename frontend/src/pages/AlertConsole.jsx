@@ -23,7 +23,7 @@ export default function AlertConsole({ realtimeAlerts, setAlerts }) {
 
     const closeAlert = async (id) => {
         try {
-            await axios.post(`http://localhost:8000/api/alerts/${id}/close`, null, { params: { notes: "Closed via console" } });
+            await axios.post(`http://${window.location.hostname}:8000/api/alerts/${id}/close`, null, { params: { notes: "Closed via console" } });
             // Update local state
             setAlerts(prev => prev.map(a => a.alert_id === id ? {...a, status: 'closed'} : a));
             setHistoricAlerts(prev => prev.map(a => a.alert_id === id ? {...a, status: 'closed'} : a));
