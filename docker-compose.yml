@@ -210,6 +210,26 @@ services:
     logging: *default-logging
     restart: unless-stopped
 
+  active_response:
+    build:
+      context: ./response
+      dockerfile: Dockerfile
+    container_name: securewatch-active-response
+    environment:
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redispass123!}@redis:6379/0
+      - FASTAPI_URL=http://backend:8000
+    volumes:
+      - ./response:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - securewatch-net
+    logging: *default-logging
+    restart: unless-stopped
+
 networks:
   securewatch-net:
     driver: bridge

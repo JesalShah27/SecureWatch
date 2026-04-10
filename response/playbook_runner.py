@@ -17,7 +17,12 @@ class PlaybookRunner:
                 "PLAYBOOK-001": "brute_force_response",
                 "PLAYBOOK-002": "malware_response",
                 "PLAYBOOK-003": "exfiltration_response",
-                "PLAYBOOK-004": "insider_threat_response"
+                "PLAYBOOK-004": "insider_threat_response",
+                "PLAYBOOK-005": "ransomware_response",
+                "PLAYBOOK-006": "web_shell_response",
+                "PLAYBOOK-007": "priv_escalation_response",
+                "PLAYBOOK-008": "crypto_mining_response",
+                "PLAYBOOK-009": "data_destruction_response"
             }
             
             module_name = playbook_map.get(playbook_name)

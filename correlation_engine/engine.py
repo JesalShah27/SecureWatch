@@ -8,6 +8,7 @@ from state_manager import StateManager
 from alert_generator import AlertGenerator
 from threat_intel import ThreatIntel
 from risk_scorer import RiskScorer
+from response_dispatcher import ResponseDispatcher
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -20,6 +21,7 @@ class CorrelationEngine:
         self.alert_generator = AlertGenerator()
         self.threat_intel = ThreatIntel()
         self.risk_scorer = RiskScorer()
+        self.response_dispatcher = ResponseDispatcher()
         
         # ES config
         self.es_host = os.getenv("ELASTICSEARCH_HOSTS", "http://localhost:9200")
@@ -114,6 +116,7 @@ class CorrelationEngine:
                 alert = self.alert_generator.create_alert(rule, event, self.state_manager)
                 if alert:
                     self.risk_scorer.update_asset_score(alert)
+                    self.response_dispatcher.dispatch(alert)
 
     def run(self):
         logger.info("Correlation Engine started. Polling every 30 seconds.")
