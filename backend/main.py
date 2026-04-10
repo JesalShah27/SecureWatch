@@ -54,7 +54,7 @@ app.include_router(sca.router, prefix="/api/sca", tags=["Configuration Assessmen
 app.include_router(compliance.router, prefix="/api/compliance", tags=["Compliance"], dependencies=[Depends(get_current_user)])
 app.include_router(hunting.router, prefix="/api/hunting", tags=["Threat Hunting"], dependencies=[Depends(get_current_user)])
 app.include_router(audit.router, prefix="/api/audit", tags=["Audit Logs"], dependencies=[Depends(get_current_user)])
-app.include_router(health.router, prefix="/api/diagnostics", tags=["Health Diagnostics"], dependencies=[Depends(get_current_user)])
+app.include_router(health.router, prefix="/api/diagnostics", tags=["Health Diagnostics"])
 app.include_router(reporting.router, prefix="/api/reporting", tags=["Reporting Engine"], dependencies=[Depends(get_current_user)])
 
 @app.get("/health")
