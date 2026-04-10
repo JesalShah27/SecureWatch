@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { Shield, Activity, Users, Settings as SettingsIcon, Crosshair, AlertOctagon, Globe, Monitor, FileSearch, Bug, ClipboardList, BookOpen, Terminal, FileText } from 'lucide-react';
+import { Shield, Activity, Users, Settings as SettingsIcon, Crosshair, AlertOctagon, Globe, Monitor, FileSearch, Bug, ClipboardList, BookOpen, Terminal, FileText, Loader2 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import AlertConsole from './pages/AlertConsole';
 import ActiveResponse from './pages/ActiveResponse';
@@ -15,12 +15,16 @@ import ComplianceCenter from './pages/ComplianceCenter';
 import ThreatHunting from './pages/ThreatHunting';
 import Reports from './pages/Reports';
 import HealthBar from './components/HealthBar';
+import Login from './pages/Login';
+import { useAuth } from './context/AuthContext';
 
 function App() {
+  const { token, loading } = useAuth();
   const [alerts, setAlerts] = useState([]);
   
   // Singleton WebSocket connection handling
   useEffect(() => {
+    if (!token) return;
     const ws = new WebSocket('ws://localhost:8000/api/alerts/ws');
     
     ws.onmessage = (event) => {
@@ -41,7 +45,19 @@ function App() {
     // Keepalive
     const interval = setInterval(() => { if(ws.readyState === 1) ws.send('ping'); }, 20000);
     return () => { clearInterval(interval); ws.close(); };
-  }, []);
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050B14]">
+        <Loader2 className="w-10 h-10 animate-spin text-siemaccent" />
+      </div>
+    );
+  }
+
+  if (!token) {
+    return <Login />;
+  }
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-siembg">

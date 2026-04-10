@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, ShieldAlert, Cpu, CheckCircle, Server, WifiOff, Activity } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import MitreMatrix from '../components/MitreMatrix';
 
 export default function Dashboard({ liveAlerts }) {
     
@@ -39,19 +40,6 @@ export default function Dashboard({ liveAlerts }) {
         { name: 'Medium', value: liveAlerts.filter(a => a.severity === 'medium').length || 25, color: '#0EA5E9' },
         { name: 'Low', value: Math.max(liveAlerts.length * 2, 45), color: '#10B981' }
     ];
-
-    // -----------------------------------------------------
-    // MITRE TACTICS DATA (Mock representation for aesthetics)
-    // -----------------------------------------------------
-    const mitreData = [
-        { tactic: 'Initial Access', count: 12 },
-        { tactic: 'Execution', count: 45 },
-        { tactic: 'Persistence', count: 8 },
-        { tactic: 'Privilege Esc', count: 5 },
-        { tactic: 'Defense Evasion', count: 19 },
-        { tactic: 'Credential Access', count: 68 },
-        { tactic: 'Lateral Movement', count: 3 }
-    ].sort((a,b) => b.count - a.count);
 
     return (
         <div className="p-8 pb-20 max-w-[1600px] mx-auto min-h-screen">
@@ -188,78 +176,65 @@ export default function Dashboard({ liveAlerts }) {
                 </div>
             </div>
 
-            {/* CHART LAYER 2 */}
-            <div className="grid grid-cols-3 gap-6">
-                
-                {/* MITRE TACTICS BAR CHART */}
-                <div className="col-span-1 glass-panel rounded-xl p-6">
-                     <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-6">Top MITRE ATT&CK Tactics</h2>
-                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={mitreData} layout="vertical" margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="tactic" type="category" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 11 }} />
-                                <Tooltip cursor={{fill: '#1F2937'}} contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', borderRadius: '8px' }}/>
-                                <Bar dataKey="count" fill="#0EA5E9" radius={[0, 4, 4, 0]}>
-                                    {mitreData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={index === 0 ? '#EF4444' : index === 1 ? '#F59E0B' : '#0EA5E9'} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                     </div>
+            {/* CHART LAYER 2: MITRE ATT&CK */}
+            <div className="mb-8 glass-panel rounded-xl p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest flex items-center">
+                        <Activity size={16} className="text-siemaccent mr-2" /> MITRE ATT&CK® Matrix
+                    </h2>
                 </div>
-
-                {/* RECENT ALERTS FEED */}
-                <div className="col-span-2 glass-panel rounded-xl overflow-hidden flex flex-col">
-                    <div className="px-6 py-5 border-b border-siemborder bg-siempanel/50 flex justify-between items-center">
-                        <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Live Alert Stream</h2>
-                        <span className="flex h-2 w-2 relative">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-siemok opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-siemok"></span>
-                        </span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto" style={{maxHeight:'320px'}}>
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-[#0b0f19]/80 sticky top-0 text-siemmelow text-xs uppercase font-bold tracking-wider z-10 shadow-sm backdrop-blur">
-                                <tr>
-                                    <th className="px-6 py-3">Time</th>
-                                    <th className="px-6 py-3">Severity</th>
-                                    <th className="px-6 py-3">Rule Name</th>
-                                    <th className="px-6 py-3">Entity</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-siemborder/50 font-mono text-[13px]">
-                                {liveAlerts.slice(0,10).map((a, i) => (
-                                    <tr key={i} className="hover:bg-siempanelhover transition-colors group cursor-pointer">
-                                        <td className="px-6 py-3 text-slate-400 group-hover:text-slate-300">{new Date(a.timestamp).toLocaleTimeString()}</td>
-                                        <td className="px-6 py-3">
-                                            <div className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                                                a.severity === 'critical' ? 'bg-siemdanger/20 text-siemdanger border border-siemdanger/30' : 
-                                                a.severity === 'high' ? 'bg-siemwarn/20 text-siemwarn border border-siemwarn/30' : 
-                                                'bg-siemaccent/20 text-siemaccent border border-siemaccent/30'
-                                            }`}>
-                                                {a.severity}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-3 font-sans font-medium text-slate-300 group-hover:text-white transition-colors">{a.rule_name}</td>
-                                        <td className="px-6 py-3 text-siemmelow">{a.entity}</td>
-                                    </tr>
-                                ))}
-                                {liveAlerts.length === 0 && (
-                                    <tr>
-                                        <td colSpan="4" className="text-center py-12 text-siemmelow font-sans flex flex-col items-center">
-                                            <ShieldAlert size={32} className="opacity-20 mb-3" />
-                                            <span>System SECURE. Awaiting detection events.</span>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
+                <MitreMatrix />
             </div>
+
+            {/* CHART LAYER 3: ALERTS */}
+            <div className="glass-panel rounded-xl overflow-hidden flex flex-col">
+                <div className="px-6 py-5 border-b border-siemborder bg-siempanel/50 flex justify-between items-center">
+                    <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Live Alert Stream</h2>
+                    <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-siemok opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-siemok"></span>
+                    </span>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[400px]">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-[#0b0f19]/80 sticky top-0 text-siemmelow text-xs uppercase font-bold tracking-wider z-10 shadow-sm backdrop-blur">
+                            <tr>
+                                <th className="px-6 py-3">Time</th>
+                                <th className="px-6 py-3">Severity</th>
+                                <th className="px-6 py-3">Rule Name</th>
+                                <th className="px-6 py-3">Entity</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-siemborder/50 font-mono text-[13px]">
+                            {liveAlerts.slice(0, 15).map((a, i) => (
+                                <tr key={i} className="hover:bg-siempanelhover transition-colors group cursor-pointer">
+                                    <td className="px-6 py-3 text-slate-400 group-hover:text-slate-300">{new Date(a.timestamp).toLocaleTimeString()}</td>
+                                    <td className="px-6 py-3">
+                                        <div className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                                            a.severity === 'critical' ? 'bg-siemdanger/20 text-siemdanger border border-siemdanger/30' : 
+                                            a.severity === 'high' ? 'bg-siemwarn/20 text-siemwarn border border-siemwarn/30' : 
+                                            'bg-siemaccent/20 text-siemaccent border border-siemaccent/30'
+                                        }`}>
+                                            {a.severity}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-3 font-sans font-medium text-slate-300 group-hover:text-white transition-colors">{a.rule_name}</td>
+                                    <td className="px-6 py-3 text-siemmelow">{a.entity}</td>
+                                </tr>
+                            ))}
+                            {liveAlerts.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" className="text-center py-12 text-siemmelow font-sans flex flex-col items-center">
+                                        <ShieldAlert size={32} className="opacity-20 mb-3" />
+                                        <span>System SECURE. Awaiting detection events.</span>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     );
 }

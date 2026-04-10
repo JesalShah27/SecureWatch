@@ -13,6 +13,15 @@
   .glass-panel {
     @apply bg-siempanel/80 backdrop-blur-md border border-siemborder shadow-lg;
   }
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply h-1.5 w-1.5;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-[#0b101e];
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full hover:bg-slate-500 transition-colors;
+  }
 }
 
 /* Ultra-minimal Scrollbar for modern themes */
