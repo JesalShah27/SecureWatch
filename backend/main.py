@@ -43,7 +43,7 @@ from auth.rbac import get_current_user
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"], dependencies=[Depends(get_current_user)])
 app.include_router(rules.router, prefix="/api/rules", tags=["Rules"], dependencies=[Depends(get_current_user)])
-app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"], dependencies=[Depends(get_current_user)])
+app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
 app.include_router(assets.router, prefix="/api/assets", tags=["Assets"], dependencies=[Depends(get_current_user)])
 app.include_router(response.router, prefix="/api/response", tags=["Active Response"], dependencies=[Depends(get_current_user)])
 app.include_router(threat_intel.router, prefix="/api/threat-intel", tags=["Threat Intel"], dependencies=[Depends(get_current_user)])

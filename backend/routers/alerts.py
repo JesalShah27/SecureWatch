@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect, Depends
 from typing import List, Dict
 from models.schemas import AlertCreate
 from services.socket_manager import manager
+from auth.rbac import get_current_user
 import logging
 
 router = APIRouter()
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 ALERTS_DB: Dict[str, dict] = {}
 
 @router.post("", status_code=201)
-async def create_alert(alert: AlertCreate, background_tasks: BackgroundTasks):
+async def create_alert(alert: AlertCreate, background_tasks: BackgroundTasks, _ = Depends(get_current_user)):
     """Correlation Engine posts new alerts here."""
     alert_dict = alert.model_dump()
     ALERTS_DB[alert.alert_id] = alert_dict
@@ -24,7 +25,7 @@ async def create_alert(alert: AlertCreate, background_tasks: BackgroundTasks):
     return {"message": "Alert created successfully"}
 
 @router.get("", response_model=List[AlertCreate])
-async def list_alerts(severity: str = None, status: str = None, limit: int = 100):
+async def list_alerts(severity: str = None, status: str = None, limit: int = 100, _ = Depends(get_current_user)):
     """Frontend fetches alert history."""
     results = list(ALERTS_DB.values())
     if severity:
@@ -37,7 +38,7 @@ async def list_alerts(severity: str = None, status: str = None, limit: int = 100
     return results[:limit]
 
 @router.post("/{alert_id}/close")
-async def close_alert(alert_id: str, notes: str = ""):
+async def close_alert(alert_id: str, notes: str = "", _ = Depends(get_current_user)):
     if alert_id not in ALERTS_DB:
         raise HTTPException(status_code=404, detail="Alert not found")
         
