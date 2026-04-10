@@ -20,12 +20,13 @@ echo "Group: $AGENT_GROUP"
 apt-get update -y && apt-get install -y python3 python3-pip python3-venv
 
 # Create directories
-mkdir -p $INSTALL_DIR/modules
+mkdir -p $INSTALL_DIR/collectors
+mkdir -p $INSTALL_DIR/core
 mkdir -p $INSTALL_DIR/config
 
 # Copy files (assuming running from source dir)
-cp agent.py $INSTALL_DIR/
-cp -r modules/* $INSTALL_DIR/modules/
+cp core/agent.py $INSTALL_DIR/core/
+cp -r collectors/* $INSTALL_DIR/collectors/
 cp -r config/* $INSTALL_DIR/config/
 cp requirements.txt $INSTALL_DIR/
 
@@ -48,7 +49,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/venv/bin/python agent.py
+ExecStart=$INSTALL_DIR/venv/bin/python core/agent.py
 Restart=always
 RestartSec=10
 

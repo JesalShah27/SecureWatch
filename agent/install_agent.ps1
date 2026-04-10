@@ -24,13 +24,14 @@ if (!(Get-Command "python" -ErrorAction SilentlyContinue)) {
 }
 
 # Create directories
-New-Item -ItemType Directory -Force -Path $InstallDir
-New-Item -ItemType Directory -Force -Path "$InstallDir\modules"
+New-Item -ItemType Directory -Force -Path "$InstallDir"
+New-Item -ItemType Directory -Force -Path "$InstallDir\collectors"
+New-Item -ItemType Directory -Force -Path "$InstallDir\core"
 New-Item -ItemType Directory -Force -Path "$InstallDir\config"
 
 # Copy files (assuming running from source dir)
-Copy-Item "agent.py" -Destination $InstallDir -Force
-Copy-Item "modules\*" -Destination "$InstallDir\modules" -Recurse -Force
+Copy-Item "core\agent.py" -Destination "$InstallDir\core" -Force
+Copy-Item "collectors\*" -Destination "$InstallDir\collectors" -Recurse -Force
 Copy-Item "config\*" -Destination "$InstallDir\config" -Recurse -Force
 Copy-Item "requirements.txt" -Destination $InstallDir -Force
 
@@ -47,7 +48,7 @@ python -m venv venv
 # Create Windows Service using NSSM (if available) or setup as scheduled task
 try {
     # Simple Scheduled task for persistence
-    $Action = New-ScheduledTaskAction -Execute "$InstallDir\venv\Scripts\python.exe" -Argument "$InstallDir\agent.py" -WorkingDirectory $InstallDir
+    $Action = New-ScheduledTaskAction -Execute "$InstallDir\venv\Scripts\python.exe" -Argument "$InstallDir\core\agent.py" -WorkingDirectory $InstallDir
     $Trigger = New-ScheduledTaskTrigger -AtStartup
     $Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
     Register-ScheduledTask -TaskName "RealSIEM Agent" -Action $Action -Trigger $Trigger -Principal $Principal -Force
