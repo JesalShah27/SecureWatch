@@ -20,7 +20,7 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     is_active: Optional[bool] = None
 
-@router.get("/", response_model=List[UserOut])
+@router.get("", response_model=List[UserOut])
 async def list_users(db: AsyncSession = Depends(get_db), current_user: User = Depends(require_admin)):
     result = await db.execute(select(User))
     users = result.scalars().all()

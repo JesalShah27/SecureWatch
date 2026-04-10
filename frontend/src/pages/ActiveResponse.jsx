@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { fetchBlocklist, blockIp, unblockIp } from '../services/api';
 import { ShieldAlert, Unlock, AlertTriangle } from 'lucide-react';
 
 export default function ActiveResponse() {
@@ -12,8 +12,8 @@ export default function ActiveResponse() {
 
     const loadBlocks = async () => {
         try {
-            const res = await api.get('/response/blocklist');
-            setBlockedIps(res.data.blocked_ips);
+            const res = await fetchBlocklist();
+            setBlockedIps(res.blocked_ips);
         } catch (e) {
             console.error(e);
         }
@@ -22,7 +22,7 @@ export default function ActiveResponse() {
     const handleBlock = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/response/block-ip', { ip_address: ipInput, reason: "Manual SOC UI Block" });
+            await blockIp(ipInput, "Manual SOC UI Block");
             setIpInput("");
             loadBlocks();
         } catch (e) {
@@ -32,7 +32,7 @@ export default function ActiveResponse() {
 
     const handleUnblock = async (ip) => {
         try {
-            await api.post('/response/unblock-ip', { ip_address: ip, reason: "Manual SOC UI Unblock" });
+            await unblockIp(ip, "Manual SOC UI Unblock");
             loadBlocks();
         } catch (e) {
             console.error(e);

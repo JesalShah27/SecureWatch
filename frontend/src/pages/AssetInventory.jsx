@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api, fetchAssets } from '../services/api';
+import { fetchAssets } from '../services/api';
 import { Network, Server, Shield } from 'lucide-react';
 
 export default function AssetInventory() {

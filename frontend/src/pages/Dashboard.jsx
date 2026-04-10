@@ -2,12 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { AlertCircle, ShieldAlert, Cpu, CheckCircle, Server, WifiOff, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import MitreMatrix from '../components/MitreMatrix';
+import { fetchAgents } from '../services/api';
 
 export default function Dashboard({ liveAlerts }) {
     
     // Live counts
     const critCount = liveAlerts.filter(a => a.severity === 'critical').length;
     const highCount = liveAlerts.filter(a => a.severity === 'high').length;
+    
+    // Dynamic agent count
+    const [agentCount, setAgentCount] = useState({ total: 0, active: 0 });
+    useEffect(() => {
+        fetchAgents().then(agents => {
+            const active = agents.filter(a => a.status === 'active' || a.status === 'connected').length;
+            setAgentCount({ total: agents.length, active });
+        }).catch(() => setAgentCount({ total: 0, active: 0 }));
+    }, []);
     
     // -----------------------------------------------------
     // MOCK HISTORICAL DATA (For aesthetic timeline charting)
@@ -35,11 +45,12 @@ export default function Dashboard({ liveAlerts }) {
     // DONUT CHART DATA (Live data mapping)
     // -----------------------------------------------------
     let severityData = [
-        { name: 'Critical', value: liveAlerts.filter(a => a.severity === 'critical').length || 2, color: '#EF4444' },
-        { name: 'High', value: liveAlerts.filter(a => a.severity === 'high').length || 8, color: '#F59E0B' },
-        { name: 'Medium', value: liveAlerts.filter(a => a.severity === 'medium').length || 25, color: '#0EA5E9' },
-        { name: 'Low', value: Math.max(liveAlerts.length * 2, 45), color: '#10B981' }
+        { name: 'Critical', value: liveAlerts.filter(a => a.severity === 'critical').length, color: '#EF4444' },
+        { name: 'High', value: liveAlerts.filter(a => a.severity === 'high').length, color: '#F59E0B' },
+        { name: 'Medium', value: liveAlerts.filter(a => a.severity === 'medium').length, color: '#0EA5E9' },
+        { name: 'Low', value: liveAlerts.filter(a => a.severity === 'low').length, color: '#10B981' }
     ];
+    const hasAlerts = severityData.some(d => d.value > 0);
 
     return (
         <div className="p-8 pb-20 max-w-[1600px] mx-auto min-h-screen">
@@ -86,8 +97,8 @@ export default function Dashboard({ liveAlerts }) {
                         <div>
                             <p className="text-siemmelow text-xs font-bold mb-1 uppercase tracking-widest">Active Agents</p>
                             <div className="flex items-baseline space-x-2">
-                                <p className="text-4xl font-black text-siemok font-mono">1</p>
-                                <p className="text-siemmelow text-sm font-semibold">/ 1</p>
+                                <p className="text-4xl font-black text-siemok font-mono">{agentCount.active}</p>
+                                <p className="text-siemmelow text-sm font-semibold">/ {agentCount.total}</p>
                             </div>
                         </div>
                         <Server className="text-siemaccent" size={42} strokeWidth={2.5} />

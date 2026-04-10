@@ -43,7 +43,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register", response_model=dict)
-async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
+async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Register a new user. Requires admin authentication."""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can register new users")
+    
     result = await db.execute(select(User).where(User.username == user_data.username))
     if result.scalars().first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
@@ -60,7 +64,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(new_user)
     
-    await log_audit(db, "system", "register_user", "auth", new_user.id)
+    await log_audit(db, current_user.username, "register_user", "auth", new_user.id)
     return {"status": "success", "user_id": new_user.id}
 
 @router.get("/me")

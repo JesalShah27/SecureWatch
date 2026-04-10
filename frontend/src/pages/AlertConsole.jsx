@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { fetchAlerts, api } from '../services/api';
+import { fetchAlerts } from '../services/api';
+import axios from 'axios';
 import { Search, Filter, ShieldOff } from 'lucide-react';
 
 export default function AlertConsole({ realtimeAlerts, setAlerts }) {
@@ -22,7 +23,7 @@ export default function AlertConsole({ realtimeAlerts, setAlerts }) {
 
     const closeAlert = async (id) => {
         try {
-            await api.post(`/alerts/${id}/close`, null, { params: { notes: "Closed via console" } });
+            await axios.post(`http://localhost:8000/api/alerts/${id}/close`, null, { params: { notes: "Closed via console" } });
             // Update local state
             setAlerts(prev => prev.map(a => a.alert_id === id ? {...a, status: 'closed'} : a));
             setHistoricAlerts(prev => prev.map(a => a.alert_id === id ? {...a, status: 'closed'} : a));

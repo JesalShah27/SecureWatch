@@ -4,8 +4,8 @@ import { Shield, Lock, User, Terminal, Loader2 } from 'lucide-react';
 
 const Login = () => {
     const { login } = useAuth();
-    const [username, setUsername] = useState('admin');
-    const [password, setPassword] = useState('SecureWatch123!');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 

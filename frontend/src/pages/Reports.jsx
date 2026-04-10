@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileDown, FileText, CheckCircle, Clock } from 'lucide-react';
-import { api } from '../services/api'; // Use underlying axios instance to handle Blob response
+import { generateReport } from '../services/api';
 
 const Reports = () => {
     const [isGenerating, setIsGenerating] = React.useState(false);
@@ -8,11 +8,9 @@ const Reports = () => {
     const handleDownloadReport = async () => {
         setIsGenerating(true);
         try {
-            const response = await api.get('/reporting/generate', {
-                responseType: 'blob'
-            });
+            const blob = await generateReport();
             
-            const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            const blobUrl = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
             const link = document.createElement('a');
             link.href = blobUrl;
             link.setAttribute('download', `SecureWatch_Executive_Report_${new Date().toISOString().slice(0,10)}.pdf`);

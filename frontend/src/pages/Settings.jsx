@@ -34,6 +34,7 @@ export default function Settings() {
                 </div>
 
                 {/* Threat Intel API Keys */}
+                {/* TODO: These controls are display-only for now. Wire up actual save functionality via a backend /api/settings endpoint. */}
                 <div className="bg-siempanel border border-slate-800 rounded-xl p-6">
                     <div className="flex items-center space-x-3 mb-6">
                         <Key className="text-siemwarn" size={24} />
@@ -42,17 +43,17 @@ export default function Settings() {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm text-slate-400 mb-1">VirusTotal API Key</label>
-                            <input type="password" placeholder="••••••••••••••••" className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-300 font-mono" />
+                            <input type="password" placeholder="••••••••••••••••" className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-300 font-mono" readOnly />
                         </div>
                         <div>
                             <label className="block text-sm text-slate-400 mb-1">AbuseIPDB API Key</label>
-                            <input type="password" placeholder="••••••••••••••••" className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-300 font-mono" />
+                            <input type="password" placeholder="••••••••••••••••" className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-300 font-mono" readOnly />
                         </div>
-                        <button className="w-full bg-slate-800 hover:bg-slate-700 text-white py-2 rounded transition-colors text-sm">Save Keys</button>
+                        <button disabled className="w-full bg-slate-800 text-slate-500 py-2 rounded text-sm cursor-not-allowed">Save Keys (Coming Soon)</button>
                     </div>
                 </div>
                 {/* Audit Logs */}
-                <div className="bg-siempanel border border-slate-800 rounded-xl p-6 md:col-span-2 mt-4 mt-8">
+                <div className="bg-siempanel border border-slate-800 rounded-xl p-6 md:col-span-2 mt-8">
                     <div className="flex items-center space-x-3 mb-6">
                         <Database className="text-emerald-500" size={24} />
                         <h2 className="text-xl font-semibold text-white">System Audit Logs</h2>
@@ -91,12 +92,12 @@ const AuditLogTable = () => {
     return logs.map((log, i) => (
         <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50">
             <td className="px-3 py-2 font-mono text-xs">{new Date(log.timestamp).toLocaleString()}</td>
-            <td className="px-3 py-2 text-siemaccent font-bold">{log.user}</td>
+            <td className="px-3 py-2 text-siemaccent font-bold">{log.user || log.username}</td>
             <td className="px-3 py-2 font-mono text-xs text-amber-400">{log.action}</td>
-            <td className="px-3 py-2">{log.resource_id}</td>
+            <td className="px-3 py-2">{log.resource_id || log.target_id || log.resource_type || '—'}</td>
             <td className="px-3 py-2">
                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${log.status === 'success' ? 'bg-emerald-900/40 text-emerald-400' : 'bg-rose-900/40 text-rose-400'}`}>
-                    {log.status}
+                    {log.status || 'ok'}
                 </span>
             </td>
         </tr>

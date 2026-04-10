@@ -26,7 +26,7 @@ class RuleCreate(BaseModel):
 class RuleOut(RuleCreate):
     id: str
 
-@router.get("/", response_model=List[RuleOut])
+@router.get("", response_model=List[RuleOut])
 async def list_rules(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(select(Rule))
     return result.scalars().all()
@@ -39,7 +39,7 @@ async def get_rule(id: str, db: AsyncSession = Depends(get_db), current_user: Us
         raise HTTPException(status_code=404, detail="Rule not found")
     return rule
 
-@router.post("/", response_model=RuleOut)
+@router.post("", response_model=RuleOut)
 async def create_rule(data: RuleCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(require_analyst)):
     new_rule = Rule(
         id=str(uuid.uuid4()),
