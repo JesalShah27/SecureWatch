@@ -49,6 +49,7 @@ services:
       - "0.0.0.0:5140:5140/udp"   # Syslog UDP - routers, firewalls, Linux devices
       - "0.0.0.0:5140:5140/tcp"   # Syslog TCP - more reliable delivery
       - "0.0.0.0:5055:5055"       # Linux Auth logs via Filebeat
+      - "0.0.0.0:5060:5060"       # API Audit Logs via custom json forwarder
       - "0.0.0.0:5514:5514/udp"   # Windows Event Log forwarding (WEF over syslog)
     depends_on:
       elasticsearch:
