@@ -3,13 +3,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from contextlib import asynccontextmanager
 import os
 import logging
 
 from routers import auth, users, rules, alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting
+from db.database import engine, Base
+import db.models  # noqa: F401 — ensures all models are registered with Base
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Validate Environment Variables
+REQUIRED_ENV_VARS = ["JWT_SECRET", "POSTGRES_URL", "REDIS_URL", "ELASTICSEARCH_HOSTS"]
+missing_vars = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+if missing_vars:
+    logger.error(f"CRITICAL: Missing required environment variables: {', '.join(missing_vars)}")
+    import sys
+    sys.exit(1)
+
+# Lifespan: create all DB tables on startup
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Creating database tables...")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables ready.")
+    yield
 
 # Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -18,8 +39,21 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(
     title="SecureWatch SOC API",
     description="Enterprise-grade API backing the SOC Dashboard",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
+
+from fastapi.responses import JSONResponse
+import traceback
+
+# Global Exception Handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {str(exc)}\n{traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal Server Error", "detail": str(exc)},
+    )
 
 # Apply limits
 app.state.limiter = limiter

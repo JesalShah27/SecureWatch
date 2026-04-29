@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -10,11 +10,15 @@ from db.database import get_db
 from db.models import User
 from auth.jwt_handler import verify_password, get_password_hash, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from auth.rbac import log_audit, get_current_user
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 class UserCreate(BaseModel):
@@ -23,7 +27,8 @@ class UserCreate(BaseModel):
     role: str = "viewer"
 
 @router.post("/login", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalars().first()
     
@@ -38,9 +43,38 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token = create_access_token(
         data={"sub": user.username, "role": user.role}, expires_delta=access_token_expires
     )
+    from auth.jwt_handler import create_refresh_token
+    refresh_token = create_refresh_token(data={"sub": user.username})
     
     await log_audit(db, user.username, "login", "auth", user.id)
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+@router.post("/refresh", response_model=Token)
+async def refresh_access_token(req: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    from auth.jwt_handler import decode_access_token, create_access_token, create_refresh_token
+    payload = decode_access_token(req.refresh_token)
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    username = payload.get("sub")
+    if username is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        
+    access_token = create_access_token(data={"sub": user.username, "role": user.role})
+    new_refresh_token = create_refresh_token(data={"sub": user.username})
+    
+    return {"access_token": access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
 
 @router.post("/register", response_model=dict)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):

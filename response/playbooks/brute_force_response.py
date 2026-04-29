@@ -25,10 +25,19 @@ def run(target_ip, dry_run=False):
     # Real execution
     fastapi_url = os.getenv("FASTAPI_URL", "http://localhost:8000")
     try:
+        # Authenticate first
+        auth_res = httpx.post(f"{fastapi_url}/api/auth/login", data={"username": "admin", "password": "SecureWatch123!"}, timeout=5.0)
+        token = ""
+        if auth_res.status_code == 200:
+            token = auth_res.json().get("access_token", "")
+            
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+            
         # Push block request to our central FastAPI state
         res = httpx.post(
             f"{fastapi_url}/api/response/block-ip",
             json={"ip_address": target_ip, "reason": "Automated Brute Force Playbook Trigger"},
+            headers=headers,
             timeout=5.0
         )
         if res.status_code == 200:

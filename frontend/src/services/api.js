@@ -37,6 +37,26 @@ export const fetchBlocklist = async () => {
     return res.data;
 };
 
+export const fetchResponsePlaybooks = async () => {
+    const res = await apiGet('/response/playbooks');
+    return res.data;
+};
+
+export const createResponsePlaybook = async (data) => {
+    const res = await apiPost('/response/playbooks', data);
+    return res.data;
+};
+
+export const deleteResponsePlaybook = async (id) => {
+    const res = await apiDelete(`/response/playbooks/${id}`);
+    return res.data;
+};
+
+export const fetchResponseHistory = async () => {
+    const res = await apiGet('/response/history');
+    return res.data;
+};
+
 export const lookupThreatIntelIP = async (ip) => {
     const res = await apiGet(`/threat-intel/ip/${ip}`);
     return res.data;

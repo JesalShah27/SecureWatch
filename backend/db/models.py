@@ -59,3 +59,25 @@ class Rule(Base):
     enabled = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class Playbook(Base):
+    __tablename__ = "playbooks"
+
+    id = Column(String(36), primary_key=True)
+    name = Column(String(256), nullable=False)
+    description = Column(Text, nullable=True)
+    trigger_condition = Column(String(256), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ResponseHistory(Base):
+    __tablename__ = "response_history"
+
+    id = Column(String(36), primary_key=True)
+    playbook_id = Column(String(36), ForeignKey("playbooks.id"), nullable=True)
+    playbook_name = Column(String(256), nullable=False)
+    target = Column(String(256), nullable=False)
+    action_taken = Column(String(256), nullable=False)
+    outcome = Column(String(32), default="Success") # Success/Failed
+    initiated_by = Column(String(128), nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())

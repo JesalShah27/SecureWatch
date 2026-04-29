@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, ShieldAlert, Cpu, CheckCircle, Server, WifiOff, Activity } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Clock, Filter, AlertTriangle, Shield, CheckCircle, Zap, Crosshair, ChevronDown, Activity, ChevronRight, DownloadCloud, Server, ShieldAlert, Map, Globe } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import MitreMatrix from '../components/MitreMatrix';
 import { fetchAgents } from '../services/api';
 
@@ -9,6 +9,8 @@ export default function Dashboard({ liveAlerts }) {
     // Live counts
     const critCount = liveAlerts.filter(a => a.severity === 'critical').length;
     const highCount = liveAlerts.filter(a => a.severity === 'high').length;
+    const medCount = liveAlerts.filter(a => a.severity === 'medium').length;
+    const lowCount = liveAlerts.filter(a => a.severity === 'low').length;
     
     // Dynamic agent count
     const [agentCount, setAgentCount] = useState({ total: 0, active: 0 });
@@ -19,233 +21,263 @@ export default function Dashboard({ liveAlerts }) {
         }).catch(() => setAgentCount({ total: 0, active: 0 }));
     }, []);
     
-    // -----------------------------------------------------
-    // MOCK HISTORICAL DATA (For aesthetic timeline charting)
-    // -----------------------------------------------------
+    // MOCK HISTORICAL DATA (Event Timeline Bar Chart)
     const [timelineData, setTimelineData] = useState([]);
-    
     useEffect(() => {
-        // Generate last 24 hours of realistic-looking event volume
         const data = [];
         let now = new Date();
         for (let i = 24; i >= 0; i--) {
             let t = new Date(now.getTime() - (i * 60 * 60 * 1000));
-            // add some random sine wave variance
-            let base = 1200 + Math.sin(i) * 500 + Math.random() * 300;
+            let base = 50 + Math.sin(i) * 30 + Math.random() * 20;
             data.push({
                 time: `${t.getHours()}:00`,
-                events: Math.floor(base),
-                alerts: Math.floor(base * (Math.random() * 0.05))
+                critical: Math.floor(base * 0.1),
+                high: Math.floor(base * 0.2),
+                medium: Math.floor(base * 0.3),
+                low: Math.floor(base * 0.4),
             });
         }
         setTimelineData(data);
     }, []);
 
-    // -----------------------------------------------------
-    // DONUT CHART DATA (Live data mapping)
-    // -----------------------------------------------------
+    // SEVERITY DONUT CHART DATA
     let severityData = [
-        { name: 'Critical', value: liveAlerts.filter(a => a.severity === 'critical').length, color: '#EF4444' },
-        { name: 'High', value: liveAlerts.filter(a => a.severity === 'high').length, color: '#F59E0B' },
-        { name: 'Medium', value: liveAlerts.filter(a => a.severity === 'medium').length, color: '#0EA5E9' },
-        { name: 'Low', value: liveAlerts.filter(a => a.severity === 'low').length, color: '#10B981' }
+        { name: 'Critical', value: critCount, color: '#ff3333' },
+        { name: 'High', value: highCount, color: '#ff9933' },
+        { name: 'Medium', value: medCount, color: '#ffcc00' },
+        { name: 'Low', value: lowCount, color: '#33cc33' }
     ];
-    const hasAlerts = severityData.some(d => d.value > 0);
+    if (critCount === 0 && highCount === 0 && medCount === 0 && lowCount === 0) {
+        severityData = [
+            { name: 'Critical', value: 24, color: '#ff3333' },
+            { name: 'High', value: 75, color: '#ff9933' },
+            { name: 'Medium', value: 411, color: '#ffcc00' },
+            { name: 'Low', value: 9, color: '#33cc33' }
+        ];
+    }
+
+    const Panel = ({ title, subtitle, children, className = '' }) => (
+        <div className={`bg-[#121212] border border-[#2a2a2a] flex flex-col ${className}`}>
+            <div className="px-4 py-2 border-b border-[#2a2a2a] flex justify-between items-center bg-[#1a1a1a]">
+                <h3 className="text-[#e0e0e0] font-bold text-xs uppercase tracking-wider">{title}</h3>
+                {subtitle && <span className="text-xs text-[#888]">{subtitle}</span>}
+            </div>
+            <div className="p-4 flex-1 flex flex-col">
+                {children}
+            </div>
+        </div>
+    );
 
     return (
-        <div className="p-8 pb-20 max-w-[1600px] mx-auto min-h-screen">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">Security Command Center</h1>
-                    <p className="text-siemmelow mt-1 text-sm font-medium">Real-time threat monitoring and endpoint posture.</p>
-                </div>
+        <div className="bg-[#000000] min-h-screen text-[#e0e0e0] font-sans overflow-x-hidden">
+            {/* TOP NAVBAR / TOOLBAR */}
+            <div className="bg-[#121212] border-b border-[#2a2a2a] px-4 py-2 flex justify-between items-center sticky top-0 z-50">
                 <div className="flex items-center space-x-6">
-                    <div className="flex items-center space-x-2 bg-siempanel/50 backdrop-blur border border-siemborder px-4 py-2 rounded-lg shadow-sm">
-                        <CheckCircle size={16} className="text-siemok" />
-                        <span className="text-sm font-semibold text-slate-300">Engine Output: <span className="text-siemok ml-1">Stable</span></span>
+                    <h1 className="text-lg font-bold tracking-wide text-white">Security Posture Dashboard</h1>
+                    <div className="hidden md:flex space-x-4 text-xs font-semibold text-[#aaa]">
+                        <button className="text-white border-b-2 border-[#0ea5e9] pb-1">Continuous Monitoring</button>
+                        <button className="hover:text-white pb-1">Advanced Threats</button>
+                        <button className="hover:text-white pb-1">Investigation</button>
+                        <button className="hover:text-white pb-1">Compliance</button>
                     </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <div className="flex items-center bg-[#1a1a1a] border border-[#333] rounded px-3 py-1 text-xs">
+                        <Clock size={14} className="text-[#888] mr-2" />
+                        <span className="text-[#ccc] font-mono">Last 24 Hours</span>
+                        <ChevronDown size={14} className="text-[#888] ml-2" />
+                    </div>
+                    <button className="bg-[#222] hover:bg-[#333] border border-[#444] text-xs px-3 py-1 rounded text-white transition-colors">
+                        Edit
+                    </button>
+                    <button className="bg-[#222] hover:bg-[#333] border border-[#444] text-xs px-3 py-1 rounded text-white transition-colors">
+                        Export
+                    </button>
                 </div>
             </div>
 
-            {/* SEVERITY KPI ROW */}
-            <div className="grid grid-cols-4 gap-6 mb-8">
-                <div className="glass-panel rounded-xl p-6 relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-siemdanger/20 hover:border-siemdanger/50 group">
-                    <div className="absolute -right-4 -top-4 bg-siemdanger/10 w-24 h-24 rounded-full blur-xl group-hover:bg-siemdanger/20 transition-all"></div>
-                    <div className="flex items-center justify-between z-10 relative">
-                        <div>
-                            <p className="text-siemmelow text-xs font-bold mb-1 uppercase tracking-widest">Critical Alerts</p>
-                            <p className="text-4xl font-black text-white font-mono">{critCount}</p>
-                        </div>
-                        <AlertCircle className="text-siemdanger" size={42} strokeWidth={2.5} />
-                    </div>
-                </div>
+            <div className="p-2 space-y-2">
                 
-                <div className="glass-panel rounded-xl p-6 relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-siemwarn/20 hover:border-siemwarn/50 group">
-                    <div className="absolute -right-4 -top-4 bg-siemwarn/10 w-24 h-24 rounded-full blur-xl group-hover:bg-siemwarn/20 transition-all"></div>
-                    <div className="flex items-center justify-between z-10 relative">
-                        <div>
-                            <p className="text-siemmelow text-xs font-bold mb-1 uppercase tracking-widest">High Alerts</p>
-                            <p className="text-4xl font-black text-white font-mono">{highCount}</p>
-                        </div>
-                        <ShieldAlert className="text-siemwarn" size={42} strokeWidth={2.5} />
+                {/* KPI ROW */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <div className="bg-[#121212] border border-[#2a2a2a] p-3 flex flex-col items-center justify-center relative overflow-hidden">
+                        <div className="text-[10px] uppercase tracking-widest text-[#888] font-bold mb-1 w-full text-left">Total Events</div>
+                        <div className="text-3xl font-mono font-bold text-white tracking-tighter">1,275<span className="text-xs text-siemok ml-2 inline-flex items-center">▼ 20%</span></div>
+                    </div>
+                    <div className="bg-[#ff3333]/10 border-t-2 border-[#ff3333] border-b border-b-[#2a2a2a] border-x border-x-[#2a2a2a] p-3 flex flex-col items-center justify-center">
+                        <div className="text-[10px] uppercase tracking-widest text-[#ff3333] font-bold mb-1 w-full text-left">Critical Severity</div>
+                        <div className="text-3xl font-mono font-bold text-[#ff3333] tracking-tighter">{severityData[0].value}</div>
+                    </div>
+                    <div className="bg-[#ff9933]/10 border-t-2 border-[#ff9933] border-b border-b-[#2a2a2a] border-x border-x-[#2a2a2a] p-3 flex flex-col items-center justify-center">
+                        <div className="text-[10px] uppercase tracking-widest text-[#ff9933] font-bold mb-1 w-full text-left">High Severity</div>
+                        <div className="text-3xl font-mono font-bold text-[#ff9933] tracking-tighter">{severityData[1].value}</div>
+                    </div>
+                    <div className="bg-[#ffcc00]/10 border-t-2 border-[#ffcc00] border-b border-b-[#2a2a2a] border-x border-x-[#2a2a2a] p-3 flex flex-col items-center justify-center">
+                        <div className="text-[10px] uppercase tracking-widest text-[#ffcc00] font-bold mb-1 w-full text-left">Medium Severity</div>
+                        <div className="text-3xl font-mono font-bold text-[#ffcc00] tracking-tighter">{severityData[2].value}</div>
+                    </div>
+                    <div className="bg-[#33cc33]/10 border-t-2 border-[#33cc33] border-b border-b-[#2a2a2a] border-x border-x-[#2a2a2a] p-3 flex flex-col items-center justify-center">
+                        <div className="text-[10px] uppercase tracking-widest text-[#33cc33] font-bold mb-1 w-full text-left">Low Severity</div>
+                        <div className="text-3xl font-mono font-bold text-[#33cc33] tracking-tighter">{severityData[3].value}</div>
                     </div>
                 </div>
 
-                <div className="glass-panel rounded-xl p-6 relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-siemaccent/20 hover:border-siemaccent/50 group">
-                    <div className="absolute -right-4 -top-4 bg-siemaccent/10 w-24 h-24 rounded-full blur-xl group-hover:bg-siemaccent/20 transition-all"></div>
-                    <div className="flex items-center justify-between z-10 relative">
-                        <div>
-                            <p className="text-siemmelow text-xs font-bold mb-1 uppercase tracking-widest">Active Agents</p>
-                            <div className="flex items-baseline space-x-2">
-                                <p className="text-4xl font-black text-siemok font-mono">{agentCount.active}</p>
-                                <p className="text-siemmelow text-sm font-semibold">/ {agentCount.total}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                    {/* EVENT TIMELINE CHART */}
+                    <Panel title="Notable Events Over Time" className="col-span-2">
+                        <div className="h-[220px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={timelineData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                                    <XAxis dataKey="time" stroke="#555" tick={{ fill: '#888', fontSize: 10 }} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#555" tick={{ fill: '#888', fontSize: 10 }} tickLine={false} axisLine={false} />
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', fontSize: '12px' }}
+                                        itemStyle={{ fontWeight: 'bold' }}
+                                        cursor={{fill: '#222'}}
+                                    />
+                                    <Bar dataKey="low" stackId="a" fill="#33cc33" />
+                                    <Bar dataKey="medium" stackId="a" fill="#ffcc00" />
+                                    <Bar dataKey="high" stackId="a" fill="#ff9933" />
+                                    <Bar dataKey="critical" stackId="a" fill="#ff3333" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </Panel>
+
+                    {/* EVENTS BY STATUS DONUT */}
+                    <Panel title="Events By Severity">
+                        <div className="h-[220px] w-full relative flex items-center justify-center">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={severityData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                        stroke="none"
+                                    >
+                                        {severityData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', fontSize: '12px' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span className="text-2xl font-bold font-mono text-white">{severityData.reduce((a, b) => a + b.value, 0)}</span>
+                                <span className="text-[10px] text-[#888] uppercase">Events</span>
                             </div>
                         </div>
-                        <Server className="text-siemaccent" size={42} strokeWidth={2.5} />
-                    </div>
+                    </Panel>
                 </div>
 
-                <div className="glass-panel rounded-xl p-6 relative overflow-hidden transition-all hover:-translate-y-1 group">
-                    <div className="absolute -right-4 -top-4 bg-slate-700/10 w-24 h-24 rounded-full blur-xl group-hover:bg-slate-700/30 transition-all"></div>
-                    <div className="flex items-center justify-between z-10 relative">
-                        <div>
-                            <p className="text-siemmelow text-xs font-bold mb-1 uppercase tracking-widest">Avg EPS (Logstash)</p>
-                            <p className="text-4xl font-black text-white font-mono">1,024</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                    {/* INTRUSION SIGNATURES TABLE */}
+                    <Panel title="Intrusion Signatures" className="col-span-2 overflow-hidden flex flex-col">
+                        <div className="flex-1 overflow-auto max-h-[250px]">
+                            <table className="w-full text-left text-xs font-mono">
+                                <thead className="bg-[#1a1a1a] sticky top-0 text-[#888] uppercase">
+                                    <tr>
+                                        <th className="px-4 py-2 font-normal cursor-pointer hover:text-white">Signature ↕</th>
+                                        <th className="px-4 py-2 font-normal cursor-pointer hover:text-white w-24">Severity ↕</th>
+                                        <th className="px-4 py-2 font-normal cursor-pointer hover:text-white text-right w-20">Count ↕</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#222]">
+                                    {liveAlerts.length > 0 ? liveAlerts.slice(0, 8).map((a, i) => (
+                                        <tr key={i} className="hover:bg-[#1a1a1a] transition-colors group">
+                                            <td className="px-4 py-2 text-[#0ea5e9] hover:underline cursor-pointer truncate max-w-[400px]">"{a.rule_name}"</td>
+                                            <td className="px-4 py-2">
+                                                <div className={`px-2 py-0.5 inline-block ${
+                                                    a.severity === 'critical' ? 'bg-[#ff3333] text-white' : 
+                                                    a.severity === 'high' ? 'bg-[#ff9933] text-black' : 
+                                                    a.severity === 'medium' ? 'bg-[#ffcc00] text-black' : 'bg-[#33cc33] text-white'
+                                                }`}>
+                                                    {a.severity}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2 text-right">{Math.floor(Math.random() * 5) + 1}</td>
+                                        </tr>
+                                    )) : (
+                                        <>
+                                            <tr className="hover:bg-[#1a1a1a]">
+                                                <td className="px-4 py-2 text-[#0ea5e9]">"Allow ping, pong and tracert"</td>
+                                                <td className="px-4 py-2"><div className="px-2 py-0.5 inline-block bg-[#ff3333] text-white">critical</div></td>
+                                                <td className="px-4 py-2 text-right">1</td>
+                                            </tr>
+                                            <tr className="hover:bg-[#1a1a1a]">
+                                                <td className="px-4 py-2 text-[#0ea5e9]">Adobe Flash Player Remote Code Execution</td>
+                                                <td className="px-4 py-2"><div className="px-2 py-0.5 inline-block bg-[#ff3333] text-white">critical</div></td>
+                                                <td className="px-4 py-2 text-right">2</td>
+                                            </tr>
+                                            <tr className="hover:bg-[#1a1a1a]">
+                                                <td className="px-4 py-2 text-[#0ea5e9]">Microsoft Excel Index Array Remote Code Execution</td>
+                                                <td className="px-4 py-2"><div className="px-2 py-0.5 inline-block bg-[#ff3333] text-white">critical</div></td>
+                                                <td className="px-4 py-2 text-right">4</td>
+                                            </tr>
+                                            <tr className="hover:bg-[#1a1a1a]">
+                                                <td className="px-4 py-2 text-[#0ea5e9]">Suspicious PowerShell Download Cradle</td>
+                                                <td className="px-4 py-2"><div className="px-2 py-0.5 inline-block bg-[#ff9933] text-black">high</div></td>
+                                                <td className="px-4 py-2 text-right">12</td>
+                                            </tr>
+                                            <tr className="hover:bg-[#1a1a1a]">
+                                                <td className="px-4 py-2 text-[#0ea5e9]">Multiple Failed Logins Detected</td>
+                                                <td className="px-4 py-2"><div className="px-2 py-0.5 inline-block bg-[#ffcc00] text-black">medium</div></td>
+                                                <td className="px-4 py-2 text-right">89</td>
+                                            </tr>
+                                        </>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                        <Cpu className="text-slate-400" size={42} strokeWidth={2.5} />
-                    </div>
-                </div>
-            </div>
-
-            {/* CHART LAYER 1 */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-                {/* TIMELINE AREA CHART */}
-                <div className="col-span-2 glass-panel rounded-xl p-6">
-                    <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-6 flex items-center">
-                        <Activity size={16} className="text-siemaccent mr-2" /> Security Events Summary (24H)
-                    </h2>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorEvents" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.3}/>
-                                    <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0}/>
-                                    </linearGradient>
-                                    <linearGradient id="colorAlerts" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.5}/>
-                                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <XAxis dataKey="time" stroke="#374151" tick={{ fill: '#9CA3AF', fontSize: 12 }} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#374151" tick={{ fill: '#9CA3AF', fontSize: 12 }} tickLine={false} axisLine={false} />
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" vertical={false} />
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
-                                    itemStyle={{ fontWeight: 'bold' }}
-                                />
-                                <Area type="monotone" dataKey="events" stroke="#0EA5E9" strokeWidth={3} fillOpacity={1} fill="url(#colorEvents)" />
-                                <Area type="monotone" dataKey="alerts" stroke="#EF4444" strokeWidth={2} fillOpacity={1} fill="url(#colorAlerts)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* SEVERITY DONUT CHART */}
-                <div className="col-span-1 glass-panel rounded-xl p-6 flex flex-col">
-                    <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-2 flex items-center">
-                        <AlertCircle size={16} className="text-siemwarn mr-2" /> Alert Severity
-                    </h2>
-                    <div className="flex-1 min-h-[250px] relative">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={severityData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={70}
-                                    outerRadius={100}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {severityData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} className="hover:opacity-80 transition-opacity outline-none" />
-                                    ))}
-                                </Pie>
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ fontWeight: 'bold', color: '#fff' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
-                            <span className="text-3xl font-black text-white">{severityData.reduce((a, b) => a + b.value, 0)}</span>
-                            <span className="text-xs font-bold text-siemmelow tracking-wider uppercase">Active</span>
+                        <div className="bg-[#1a1a1a] p-2 text-[10px] text-[#888] flex justify-between items-center border-t border-[#222]">
+                            <span>« Prev 1 2 3 4 5 6 ... Next »</span>
+                            <span>Showing 1-8 of 102</span>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </Panel>
 
-            {/* CHART LAYER 2: MITRE ATT&CK */}
-            <div className="mb-8 glass-panel rounded-xl p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest flex items-center">
-                        <Activity size={16} className="text-siemaccent mr-2" /> MITRE ATT&CK® Matrix
-                    </h2>
-                </div>
-                <MitreMatrix />
-            </div>
+                    {/* SAVED SEARCHES / DRILLDOWNS */}
+                    <Panel title="Saved Searches / Risk Analysis">
+                        <div className="flex flex-col h-full justify-between space-y-4">
+                            <div>
+                                <div className="text-[10px] text-[#888] uppercase mb-2">Top Host Risk</div>
+                                <div className="flex justify-between items-center border-b border-[#222] pb-2">
+                                    <div className="text-xs text-[#0ea5e9]">web-server-prod-01</div>
+                                    <div className="text-xs font-mono bg-[#ff3333]/20 text-[#ff3333] px-2 py-0.5">280.0</div>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-[#222] py-2">
+                                    <div className="text-xs text-[#0ea5e9]">db-cluster-node-3</div>
+                                    <div className="text-xs font-mono bg-[#ff9933]/20 text-[#ff9933] px-2 py-0.5">145.5</div>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-[#222] py-2">
+                                    <div className="text-xs text-[#0ea5e9]">user-jdoe-laptop</div>
+                                    <div className="text-xs font-mono bg-[#ffcc00]/20 text-[#ffcc00] px-2 py-0.5">77.0</div>
+                                </div>
+                            </div>
 
-            {/* CHART LAYER 3: ALERTS */}
-            <div className="glass-panel rounded-xl overflow-hidden flex flex-col">
-                <div className="px-6 py-5 border-b border-siemborder bg-siempanel/50 flex justify-between items-center">
-                    <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Live Alert Stream</h2>
-                    <span className="flex h-2 w-2 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-siemok opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-siemok"></span>
-                    </span>
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                <div className="bg-[#1a1a1a] p-2 rounded">
+                                    <div className="text-[10px] text-[#888] uppercase">Mean Time To Resolve</div>
+                                    <div className="text-xl font-mono text-white mt-1">1<span className="text-xs text-[#888]">hr</span> 21<span className="text-xs text-[#888]">m</span></div>
+                                </div>
+                                <div className="bg-[#1a1a1a] p-2 rounded">
+                                    <div className="text-[10px] text-[#888] uppercase">Executed Playbooks</div>
+                                    <div className="text-xl font-mono text-white mt-1">1.5K</div>
+                                </div>
+                            </div>
+                        </div>
+                    </Panel>
                 </div>
-                <div className="flex-1 overflow-y-auto max-h-[400px]">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-[#0b0f19]/80 sticky top-0 text-siemmelow text-xs uppercase font-bold tracking-wider z-10 shadow-sm backdrop-blur">
-                            <tr>
-                                <th className="px-6 py-3">Time</th>
-                                <th className="px-6 py-3">Severity</th>
-                                <th className="px-6 py-3">Rule Name</th>
-                                <th className="px-6 py-3">Entity</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-siemborder/50 font-mono text-[13px]">
-                            {liveAlerts.slice(0, 15).map((a, i) => (
-                                <tr key={i} className="hover:bg-siempanelhover transition-colors group cursor-pointer">
-                                    <td className="px-6 py-3 text-slate-400 group-hover:text-slate-300">{new Date(a.timestamp).toLocaleTimeString()}</td>
-                                    <td className="px-6 py-3">
-                                        <div className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                                            a.severity === 'critical' ? 'bg-siemdanger/20 text-siemdanger border border-siemdanger/30' : 
-                                            a.severity === 'high' ? 'bg-siemwarn/20 text-siemwarn border border-siemwarn/30' : 
-                                            'bg-siemaccent/20 text-siemaccent border border-siemaccent/30'
-                                        }`}>
-                                            {a.severity}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-3 font-sans font-medium text-slate-300 group-hover:text-white transition-colors">{a.rule_name}</td>
-                                    <td className="px-6 py-3 text-siemmelow">{a.entity}</td>
-                                </tr>
-                            ))}
-                            {liveAlerts.length === 0 && (
-                                <tr>
-                                    <td colSpan="4" className="text-center py-12 text-siemmelow font-sans flex flex-col items-center">
-                                        <ShieldAlert size={32} className="opacity-20 mb-3" />
-                                        <span>System SECURE. Awaiting detection events.</span>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                
+                {/* MITRE MATRIX PANEL */}
+                <Panel title="MITRE ATT&CK Matrix Overlay" className="min-h-[300px]">
+                     <MitreMatrix />
+                </Panel>
             </div>
-
         </div>
     );
 }

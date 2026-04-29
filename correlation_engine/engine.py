@@ -3,6 +3,8 @@ import json
 import os
 import logging
 import httpx
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from rule_loader import RuleLoader
 from state_manager import StateManager
 from alert_generator import AlertGenerator
@@ -13,6 +15,35 @@ from response_dispatcher import ResponseDispatcher
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
+
+class HealthHandler(BaseHTTPRequestHandler):
+    engine_ref = None
+
+    def do_GET(self):
+        if self.path == "/health":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            
+            rules_count = len(self.engine_ref.rules) if self.engine_ref else 0
+            last_poll = self.engine_ref.last_poll if self.engine_ref else 0
+            
+            response = {
+                "status": "healthy",
+                "rules_loaded": rules_count,
+                "last_poll_time": last_poll,
+                "uptime": time.time() - self.engine_ref.start_time if self.engine_ref else 0
+            }
+            self.wfile.write(json.dumps(response).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+def run_health_server(engine):
+    HealthHandler.engine_ref = engine
+    server = HTTPServer(('0.0.0.0', 8001), HealthHandler)
+    logger.info("Health server listening on port 8001")
+    server.serve_forever()
 
 class CorrelationEngine:
     def __init__(self):
@@ -28,13 +59,13 @@ class CorrelationEngine:
         self.es_user = os.getenv("ELASTICSEARCH_USERNAME", "elastic")
         self.es_pass = os.getenv("ELASTICSEARCH_PASSWORD", "")
         self.last_poll = time.time() - 30 # Start looking 30s in the past
+        self.start_time = time.time()
 
     def query_elasticsearch(self):
         """Poll ES for new events marked as siem_detected_event by Logstash"""
         now = time.time()
         
         # Strict mapping to ensure we don't drop events. 
-        # In production this would use ES strictly formatted ISO8601 strings.
         query = {
             "query": {
                 "bool": {
@@ -103,23 +134,37 @@ class CorrelationEngine:
                     
                 threshold = logic.get("threshold", 5)
                 window = logic.get("window", 120) # seconds
+                import uuid
+                unique_event_id = f"{event.get('@timestamp', time.time())}_{uuid.uuid4().hex[:8]}"
                 count = self.state_manager.track_event(
                     threshold_key=f"{rule['rule_id']}:{entity_field}",
-                    event_id=str(event.get("@timestamp", time.time())),
+                    event_id=unique_event_id,
                     window_seconds=window
                 )
                 if count >= threshold:
                     is_match = True
 
             if is_match:
+                entity_key = get_nested(event, logic.get("group_by", "source_ip")) or "global"
+                if self.state_manager.is_suppressed(rule['rule_id'], entity_key):
+                    logger.debug(f"Alert suppressed for rule {rule['rule_id']} on {entity_key}")
+                    continue
+                    
                 logger.info(f"Event matched rule {rule['rule_id']}")
                 alert = self.alert_generator.create_alert(rule, event, self.state_manager)
                 if alert:
+                    suppression_window = rule.get("suppression", 900)
+                    self.state_manager.suppress_alert(rule['rule_id'], entity_key, timeframe_seconds=suppression_window)
                     self.risk_scorer.update_asset_score(alert)
                     self.response_dispatcher.dispatch(alert)
 
     def run(self):
-        logger.info("Correlation Engine started. Polling every 30 seconds.")
+        logger.info("Correlation Engine started. Polling every 10 seconds.")
+        
+        # Start health server in background thread
+        health_thread = threading.Thread(target=run_health_server, args=(self,), daemon=True)
+        health_thread.start()
+        
         while True:
             try:
                 events = self.query_elasticsearch()
