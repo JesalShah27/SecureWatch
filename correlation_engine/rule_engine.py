@@ -116,8 +116,8 @@ class RuleEvaluator:
         """
         # Check base field condition first
         field = logic.get("field", "")
-        condition = logic.get("match_condition", "exists")
-        value = logic.get("match_value", "")
+        value = logic.get("match_value", logic.get("value", ""))
+        condition = logic.get("match_condition", "equals" if value else "exists")
 
         if field:
             field_val = self._get_field(event, field)

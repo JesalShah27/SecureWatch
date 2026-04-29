@@ -42,7 +42,7 @@ class CorrelationEngine:
                         {"match": {"tags": "siem_detected_event"}},
                         {"range": {
                             "@timestamp": {
-                                "gte": f"now-30s"
+                                "gte": f"now-15s"
                             }
                         }}
                     ]
@@ -130,7 +130,7 @@ class CorrelationEngine:
             except Exception as e:
                 logger.error(f"Crash in main loop: {e}")
                 
-            time.sleep(30)
+            time.sleep(10)  # Poll every 10 seconds for near-real-time detection
 
 if __name__ == "__main__":
     time.sleep(10) # Wait for other services to settle

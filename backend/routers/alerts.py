@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 ALERTS_DB: Dict[str, dict] = {}
 
 @router.post("", status_code=201)
-async def create_alert(alert: AlertCreate, background_tasks: BackgroundTasks, _ = Depends(get_current_user)):
+async def create_alert(alert: AlertCreate, background_tasks: BackgroundTasks):  # No auth: internal service call from Correlation Engine
     """Correlation Engine posts new alerts here."""
     alert_dict = alert.model_dump()
     ALERTS_DB[alert.alert_id] = alert_dict

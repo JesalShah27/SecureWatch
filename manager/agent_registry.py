@@ -10,6 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
+import json
 import asyncpg
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -103,7 +104,7 @@ class AgentRegistry:
                 """,
                 agent.agent_id, agent.hostname, agent.ip_address, agent.os_type,
                 agent.os_version, agent.agent_version, "active", agent.group_name,
-                agent.registered_at, dict(agent.labels), agent.token
+                agent.registered_at, json.dumps(agent.labels), agent.token
             )
         logger.info(f"Agent registered: {agent.hostname} ({agent.agent_id})")
         return agent

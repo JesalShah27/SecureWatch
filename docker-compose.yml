@@ -108,7 +108,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-siempass123!}
       - POSTGRES_DB=${POSTGRES_DB:-siemdb}
     ports:
-      - "127.0.0.1:5432:5432"   # Postgres only on localhost
+      - "127.0.0.1:5433:5432"   # Postgres only on localhost
     volumes:
       - securewatch-pg-data:/var/lib/postgresql/data
     networks:

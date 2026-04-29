@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from typing import Dict
 from models.schemas import AssetUpdate
+from auth.rbac import get_current_user
 import logging
 
 router = APIRouter()
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Mock DB for phase 4
 ASSETS_DB: Dict[str, dict] = {}
 
-@router.post("/risk-update")
+@router.post("/risk-update")  # No auth — internal call from Correlation Engine
 async def update_risk(asset: AssetUpdate):
     """The Correlation Engine posts to this when an alert fires to tweak the asset risk profile."""
     entity = asset.entity_id
@@ -33,7 +34,7 @@ async def update_risk(asset: AssetUpdate):
 
     return {"status": "updated", "new_risk_score": new_risk}
 
-@router.get("")
+@router.get("", dependencies=[Depends(get_current_user)])
 async def get_assets():
     """Frontend calls this to populate the asset inventory UI."""
     return [

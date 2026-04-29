@@ -27,7 +27,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS Policy - Crucial for React frontend separation
 # CORS Policy - credentials=True requires explicit origins ("*" + credentials is browser-invalid)
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -44,7 +44,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"], dependencies=[Depends(get_current_user)])
 app.include_router(rules.router, prefix="/api/rules", tags=["Rules"], dependencies=[Depends(get_current_user)])
 app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
-app.include_router(assets.router, prefix="/api/assets", tags=["Assets"], dependencies=[Depends(get_current_user)])
+app.include_router(assets.router, prefix="/api/assets", tags=["Assets"])  # Auth handled per-endpoint (risk-update is internal)
 app.include_router(response.router, prefix="/api/response", tags=["Active Response"], dependencies=[Depends(get_current_user)])
 app.include_router(threat_intel.router, prefix="/api/threat-intel", tags=["Threat Intel"], dependencies=[Depends(get_current_user)])
 app.include_router(agents.router, prefix="/api/agents", tags=["Agents"], dependencies=[Depends(get_current_user)])

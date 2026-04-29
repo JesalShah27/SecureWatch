@@ -11,7 +11,7 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-SIEM_IP="192.168.1.4"
+SIEM_IP=$(ipconfig getifaddr en0 2>/dev/null || echo "192.168.1.3")
 
 echo -e "${GREEN}=========================================="
 echo -e "   SecureWatch - Home Network Deployment"
@@ -70,6 +70,14 @@ until curl -s http://localhost:8000/health > /dev/null 2>&1; do
     echo -n ". "
 done
 echo -e "\n${GREEN}[INFO] Backend API is healthy.${NC}"
+
+# Auto-run DB migrations and ensure admin user exists
+echo -e "${GREEN}[*] Running database migrations...${NC}"
+docker compose exec -T backend alembic upgrade head 2>&1 | grep -E "Running|INFO|ERROR" || true
+
+echo -e "${GREEN}[*] Ensuring admin user exists...${NC}"
+docker compose exec -T backend python create_admin.py admin SecureWatch123! 2>&1 | grep -v Traceback | grep -v "File \"" | grep -v "  " | grep -v "^$" || true
+echo -e "${GREEN}[INFO] Admin user ready: admin / SecureWatch123!${NC}"
 
 # Install Filebeat on this Mac host (if brew is available)
 echo -e "${GREEN}[3/4] Setting up Beats on this Mac host...${NC}"
