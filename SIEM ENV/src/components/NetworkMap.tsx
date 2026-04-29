@@ -55,14 +55,14 @@ export default function NetworkMap() {
       selector: 'node',
       style: {
         'label': 'data(label)',
-        'color': '#cbd5e1', // text-slate-300
+        'color': '#c9d1d9',
         'font-size': '12px',
         'font-family': 'monospace',
         'text-valign': 'bottom',
         'text-margin-y': 8,
-        'background-color': '#1e293b', // default bg
+        'background-color': '#161b22', 
         'border-width': 2,
-        'border-color': '#3b82f6', // default border
+        'border-color': '#30363d', 
         'width': 40,
         'height': 40,
       }
@@ -70,23 +70,26 @@ export default function NetworkMap() {
     {
       selector: 'node.status-green',
       style: {
-        'border-color': '#22c55e', // green-500
-        'background-color': '#14532d', // green-900
+        'border-color': '#00ff88', 
+        'background-color': '#00ff88', 
+        'background-opacity': 0.1,
       }
     },
     {
       selector: 'node.status-yellow',
       style: {
-        'border-color': '#eab308', // yellow-500
-        'background-color': '#713f12', // yellow-900
+        'border-color': '#ffaa00', 
+        'background-color': '#ffaa00',
+        'background-opacity': 0.1,
       }
     },
     {
       selector: 'node.status-red',
       style: {
-        'border-color': '#ef4444', // red-500
-        'background-color': '#7f1d1d', // red-900
-        'shadow-color': '#ef4444',
+        'border-color': '#ff3355', 
+        'background-color': '#ff3355',
+        'background-opacity': 0.2,
+        'shadow-color': '#ff3355',
         'shadow-blur': 20,
         'shadow-opacity': 0.8,
       }
@@ -94,8 +97,8 @@ export default function NetworkMap() {
     {
       selector: 'node.status-grey',
       style: {
-        'border-color': '#64748b', // slate-500
-        'background-color': '#334155', // slate-700
+        'border-color': '#30363d', 
+        'background-color': '#0d1117', 
         'border-style': 'dashed',
       }
     },
@@ -103,25 +106,25 @@ export default function NetworkMap() {
       selector: 'node.selected',
       style: {
         'border-width': 4,
-        'border-color': '#a855f7', // purple-500
+        'border-color': '#00d4ff', 
       }
     },
     {
       selector: 'edge',
       style: {
         'width': 2,
-        'line-color': '#334155',
+        'line-color': '#30363d',
         'curve-style': 'bezier',
         'target-arrow-shape': 'triangle',
-        'target-arrow-color': '#334155',
+        'target-arrow-color': '#30363d',
         'opacity': 0.5,
       }
     },
     {
       selector: 'edge.edge-active',
       style: {
-        'line-color': '#ef4444',
-        'target-arrow-color': '#ef4444',
+        'line-color': '#ff3355',
+        'target-arrow-color': '#ff3355',
         'width': 4,
         'opacity': 0.9,
         'line-style': 'dashed',
@@ -155,7 +158,7 @@ export default function NetworkMap() {
 
       {/* Pulsing overlay for red nodes (since Cytoscape keyframe animations are limited) */}
       {nodes.filter(n => n.status === 'RED').length > 0 && (
-        <div className="absolute inset-0 pointer-events-none animate-pulse-slow shadow-[inset_0_0_100px_rgba(239,68,68,0.2)]"></div>
+        <div className="absolute inset-0 pointer-events-none animate-pulse-slow shadow-[inset_0_0_100px_rgba(255,51,85,0.2)]"></div>
       )}
 
       {selectedNode && (

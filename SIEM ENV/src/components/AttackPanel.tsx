@@ -20,9 +20,9 @@ export default function AttackPanel() {
   const { triggerAttack, activeAttacks } = useSimulation();
 
   return (
-    <div className="p-4 border-b border-gray-800">
-      <h2 className="text-lg font-bold text-gray-100 font-mono mb-4 flex items-center gap-2">
-        <Crosshair className="text-red-500" size={20} />
+    <div className="p-4 border-b border-[#30363d] bg-[#0d1117]">
+      <h2 className="text-lg font-bold text-[#e8eaed] font-mono mb-4 flex items-center gap-2">
+        <Crosshair className="text-[#ff3355]" size={20} />
         ATTACK_SIMULATION_CONTROL
       </h2>
       
@@ -34,24 +34,24 @@ export default function AttackPanel() {
               key={scenario.type}
               onClick={() => triggerAttack(scenario.type)}
               disabled={isActive}
-              className={`flex flex-col items-start p-3 rounded border text-left transition-all ${
+              className={`flex flex-col items-start p-3 rounded border text-left transition-all w-full overflow-hidden ${
                 isActive 
-                  ? 'bg-red-500/20 border-red-500 text-red-200 cursor-not-allowed opacity-80'
-                  : 'bg-gray-800 border-gray-700 hover:border-red-500 hover:bg-gray-700 text-gray-300'
+                  ? 'bg-[#ff3355]/20 border-[#ff3355] text-[#ff3355] cursor-not-allowed opacity-80'
+                  : 'bg-[#161b22] border-[#30363d] hover:border-[#ff3355] hover:bg-[#1f2428] text-[#c9d1d9]'
               }`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <span className={isActive ? 'text-red-400' : 'text-gray-400'}>
+              <div className="flex items-center gap-2 mb-1 w-full overflow-hidden">
+                <span className={`shrink-0 ${isActive ? 'text-[#ff3355]' : 'text-[#8b949e]'}`}>
                   {scenario.icon}
                 </span>
-                <span className="font-bold text-sm truncate">{scenario.name}</span>
+                <span className="font-bold text-sm leading-tight">{scenario.name}</span>
               </div>
-              <span className="text-xs text-gray-500 truncate w-full" title={scenario.desc}>
+              <span className="text-xs text-[#8b949e] leading-tight mt-1" title={scenario.desc}>
                 {scenario.desc}
               </span>
               {isActive && (
-                <div className="w-full mt-2 h-1 bg-gray-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-red-500 animate-pulse w-full"></div>
+                <div className="w-full mt-2 h-1 bg-[#0d1117] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#ff3355] animate-pulse w-full"></div>
                 </div>
               )}
             </button>
