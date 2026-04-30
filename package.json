@@ -1,0 +1,20 @@
+{
+  "name": "realsiem-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "sentinel-watch",
+    "SIEM ENV",
+    "SIEM ENV/server"
+  ],
+  "scripts": {
+    "start": "npm run start:relay & npm run start:sandbox & npm run start:siem & npm run start:docker",
+    "start:relay": "cd \"SIEM ENV/server\" && node index.js",
+    "start:sandbox": "cd \"SIEM ENV\" && npm run dev",
+    "start:siem": "cd \"sentinel-watch\" && npm run dev",
+    "start:docker": "docker-compose up -d",
+    "stop": "killall node && docker-compose stop",
+    "install:all": "npm install"
+  },
+  "dependencies": {}
+}

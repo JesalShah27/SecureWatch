@@ -36,7 +36,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
     });
 
     // Forward to Relay Backend
-    fetch('http://localhost:3001/api/logs', {
+    fetch('http://localhost:4000/api/logs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(log)

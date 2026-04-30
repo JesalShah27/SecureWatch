@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 import os
 import logging
 
-from routers import auth, users, rules, alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting
+from routers import auth, users, rules, alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting, dashboard, threat_map, incidents, logs
 from db.database import engine, Base
 import db.models  # noqa: F401 — ensures all models are registered with Base
 
@@ -90,6 +90,10 @@ app.include_router(hunting.router, prefix="/api/hunting", tags=["Threat Hunting"
 app.include_router(audit.router, prefix="/api/audit", tags=["Audit Logs"], dependencies=[Depends(get_current_user)])
 app.include_router(health.router, prefix="/api/diagnostics", tags=["Health Diagnostics"])
 app.include_router(reporting.router, prefix="/api/reporting", tags=["Reporting Engine"], dependencies=[Depends(get_current_user)])
+app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
+app.include_router(threat_map.router, prefix="/api/v1/threat-map", tags=["Threat Map"])
+app.include_router(incidents.router, prefix="/api/v1/incidents", tags=["Incidents"])
+app.include_router(logs.router, prefix="/api/v1/logs", tags=["Logs"])
 
 @app.get("/health")
 def health_check():
