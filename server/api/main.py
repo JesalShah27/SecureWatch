@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 import os
 import logging
 
-from routers import auth, users, rules, alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting, dashboard, threat_map, incidents, logs
+from routes import auth, users, rules, alerts, assets, response, threat_intel, agents, fim, vulnerabilities, sca, compliance, hunting, audit, health, reporting, dashboard, threat_map, incidents, logs
 from db.database import engine, Base
 import db.models  # noqa: F401 — ensures all models are registered with Base
 
