@@ -5,7 +5,7 @@
     "start": "npm run start:relay & npm run start:sandbox & npm run start:siem & npm run start:docker",
     "start:relay": "cd \"realsiem/SIEM ENV/server\" && node index.js",
     "start:sandbox": "cd \"realsiem/SIEM ENV\" && npm run dev",
-    "start:siem": "cd \"simulated-siem\" && npm run dev",
+    "start:siem": "cd \"sentinel-watch\" && npm run dev",
     "start:docker": "cd \"realsiem\" && docker-compose up -d",
     "stop": "killall node && cd \"realsiem\" && docker-compose stop"
   },
