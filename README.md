@@ -85,21 +85,28 @@ Every detection rule maps directly to MITRE ATT&CK tactics and techniques. The p
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                 FASTAPI BACKEND                              │
-│  ┌────────┐ ┌────────┐ ┌──────────┐ ┌─────────────────┐    │
-│  │ Alerts │ │ Assets │ │ Response │ │  Threat Intel    │    │
-│  │  API   │ │  API   │ │   API    │ │     API          │    │
-│  └────────┘ └────────┘ └──────────┘ └─────────────────┘    │
-│                    WebSocket (Real-time Push)                │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│              REACT SOC DASHBOARD                             │
-│  ┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ │
-│  │Dashboard │ │ Alert  │ │Response│ │  Threat│ │ Asset  │ │
-│  │ Overview │ │Console │ │ Engine │ │  Intel │ │Inventory│ │
-│  └──────────┘ └────────┘ └────────┘ └────────┘ └────────┘ │
+│                       SERVER DOMAIN                          │
+│                                                             │
+│  ┌───────────────────┐               ┌───────────────────┐  │
+│  │   Python/FastAPI  │               │   Node.js Relay   │  │
+│  │   Core Backend    │               │   Sandbox API     │  │
+│  │ ┌───────────────┐ │               │ ┌───────────────┐ │  │
+│  │ │ Alerts/Assets │ │               │ │ Log Streaming │ │  │
+│  │ └───────────────┘ │               │ └───────────────┘ │  │
+│  └─────────┬─────────┘               └─────────┬─────────┘  │
+└────────────┼───────────────────────────────────┼────────────┘
+             │                                   │
+             ▼                                   ▼
+┌────────────┴───────────────────────────────────┴────────────┐
+│                       CLIENT DOMAIN                          │
+│                                                             │
+│  ┌───────────────────┐               ┌───────────────────┐  │
+│  │ React Dashboard   │               │ React Sandbox     │  │
+│  │ SOC Command Center│               │ Attack Simulator  │  │
+│  │ ┌───────────────┐ │               │ ┌───────────────┐ │  │
+│  │ │ UI Components │ │               │ │ Interactive UI│ │  │
+│  │ └───────────────┘ │               │ └───────────────┘ │  │
+│  └───────────────────┘               └───────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -167,45 +174,31 @@ This fires SSH brute force and privilege escalation events into the SIEM pipelin
 
 ```
 securewatch/
-├── agent/                      # Endpoint agent installers
-│   ├── install_agent.sh        # Linux (Debian/Ubuntu) agent installer
-│   └── install_agent.ps1       # Windows agent installer (PowerShell)
-├── attack_simulator/           # Security testing tools
-│   └── simulator.py            # Multi-stage attack simulation
-├── backend/                    # FastAPI REST API & WebSocket server
-│   ├── main.py                 # Application entrypoint
-│   ├── models/                 # Pydantic schemas
-│   ├── routers/                # API route handlers
-│   │   ├── alerts.py           # Alert lifecycle management
-│   │   ├── assets.py           # Asset risk tracking
-│   │   ├── response.py         # Active response (IP blocking)
-│   │   └── threat_intel.py     # VT/AbuseIPDB lookups
-│   └── services/               # Business logic & WebSocket manager
-├── beats/                      # Elastic Beats configurations
-│   ├── filebeat.yml            # Log file collection
-│   ├── winlogbeat.yml          # Windows event collection
-│   ├── packetbeat.yml          # Network traffic capture
-│   ├── auditbeat.yml           # System audit events
-│   └── metricbeat.yml          # Performance metrics
+├── client/                     # Frontend Applications (React)
+│   ├── dashboard/              # Main SOC Command Center (Vite + Tailwind)
+│   └── sandbox/                # Interactive Simulation Environment
+├── server/                     # Backend Services
+│   ├── api/                    # Core Python/FastAPI Backend
+│   │   ├── main.py             # Application entrypoint
+│   │   ├── models/             # Pydantic & SQLAlchemy schemas
+│   │   ├── routes/             # API route handlers (Alerts, Assets, etc.)
+│   │   └── services/           # Business logic & WebSocket manager
+│   └── relay/                  # Node.js Sandbox Relay Server (MVC)
+│       ├── controllers/        # Request handling and streaming
+│       ├── models/             # In-memory log store
+│       ├── routes/             # Express API routing
+│       └── services/           # Event processing and MITRE mapping
 ├── correlation_engine/         # Python detection engine
 │   ├── engine.py               # Core polling & evaluation loop
-│   ├── rule_loader.py          # YAML rule parser
-│   ├── state_manager.py        # Redis sliding-window state
-│   ├── alert_generator.py      # Alert creation & suppression
-│   ├── risk_scorer.py          # Asset risk calculation
-│   ├── threat_intel.py         # External threat feed lookups
 │   └── rules/                  # YAML detection rule definitions
-├── elasticsearch/              # Elasticsearch configuration
-├── frontend/                   # React SOC Dashboard (Vite + Tailwind)
-│   └── src/
-│       ├── pages/              # Dashboard, AlertConsole, Response, etc.
-│       └── services/           # API client & WebSocket hooks
 ├── logstash/                   # Log ingestion & enrichment
-│   ├── config/                 # Logstash settings
 │   └── pipeline/               # Parsing & MITRE tagging pipelines
+├── attack_simulator/           # Security testing tools
+├── beats/                      # Elastic Beats configurations
+├── agent/                      # Endpoint agent installers
+├── elasticsearch/              # Elasticsearch configuration
 ├── response/                   # Automated response framework
-│   ├── playbook_runner.py      # Dynamic playbook executor
-│   └── playbooks/              # Response automation scripts
+├── package.json                # Root NPM Workspace configuration
 ├── docker-compose.yml          # Full stack orchestration
 ├── start.sh                    # One-command deployment
 ├── stop.sh                     # Graceful shutdown
